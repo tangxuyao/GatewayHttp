@@ -8,19 +8,20 @@ import (
 	micro "github.com/micro/go-micro/client"
 	"fmt"
 	"encoding/json"
+	"golang.org/x/net/context"
 )
 
 type Restful struct {
-	version    string
-	cliAccount account_api.AccountServiceClient
+	version string
+	crm     crm_api.CRMServiceClient
 }
 
 var restful Restful
 
 func SetupHandler(r *mux.Router, cli micro.Client) {
 	restful = Restful{
-		version:    "v1",
-		cliAccount: account_api.NewAccountServiceClient("account", cli),
+		version: "v1",
+		crm:     crm_api.NewCRMServiceClient("crm", cli),
 	}
 
 	r.HandleFunc("/"+restful.version+"/kv", restful.getAllKV)
@@ -75,10 +76,16 @@ func (rest *Restful) signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//rest.cli_account.Signup(context.TODO(), &account_api.SignupReq{Name:"phone"})
+	ret, err := rest.crm.Signup(context.TODO(), &crm_api.SignupReq{})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "[gateway] 无法获得CRM数据")
+		return
+	}
 
 	m := map[string]string{
-		"token": "i'am god",
+		"token": ret.Token,
+		"id":    ret.ID,
 		"now":   fmt.Sprintf("%d", time.Now().Unix()),
 	}
 
