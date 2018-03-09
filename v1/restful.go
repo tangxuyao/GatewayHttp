@@ -8,24 +8,23 @@ import (
 	"fmt"
 	"encoding/json"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
+	"github.com/micro/go-micro/client"
+	"proto/gm"
 )
 
 type Restful struct {
 	version string
-	ctx     context.Context
 	crm     crm_api.CRMServiceClient
-	//gm      gm_api.GameServiceClient
+	gm      gm_api.GameServiceClient
 }
 
 var restful Restful
 
-func SetupHandler(r *mux.Router, ctx context.Context, conn *grpc.ClientConn) {
+func SetupHandler(r *mux.Router, c client.Client) {
 	restful = Restful{
 		version: "v1",
-		ctx:     ctx,
-		crm:     crm_api.NewCRMServiceClient(conn),
-		//gm:      gm_api.NewGameServiceClient(conn),
+		crm:     crm_api.NewCRMServiceClient("crmService", c),
+		gm:      gm_api.NewGameServiceClient("game-mode", c),
 	}
 
 	r.HandleFunc("/"+restful.version+"/kv", restful.getAllKV)
@@ -117,7 +116,9 @@ func (rest *Restful) startGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := rest.crm.MakeActor(context.TODO(), &crm_api.MakeActorReq{Token: token, Name: "老鹰"})
+	name := r.FormValue("name") // 参数可以为空
+
+	_, err := rest.gm.StartGame(context.TODO(), &gm_api.StartGameReq{Token: token, Name: name})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		ret := map[string]string{
@@ -125,11 +126,24 @@ func (rest *Restful) startGame(w http.ResponseWriter, r *http.Request) {
 			"message": fmt.Sprintf("%s", err),
 			"now":     fmt.Sprintf("%d", time.Now().Unix()),
 		}
-
 		rsp, _ := json.Marshal(ret)
 		fmt.Fprintln(w, string(rsp))
 		return
 	}
+
+	//_, err = rest.crm.MakeActor(context.TODO(), &crm_api.MakeActorReq{Token: token, Name: name})
+	//if err != nil {
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	ret := map[string]string{
+	//		"code":    "1",
+	//		"message": fmt.Sprintf("%s", err),
+	//		"now":     fmt.Sprintf("%d", time.Now().Unix()),
+	//	}
+	//
+	//	rsp, _ := json.Marshal(ret)
+	//	fmt.Fprintln(w, string(rsp))
+	//	return
+	//}
 
 	m := map[string]string{
 		"now": fmt.Sprintf("%d", time.Now().Unix()),
