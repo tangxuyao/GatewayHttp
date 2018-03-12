@@ -131,20 +131,6 @@ func (rest *Restful) startGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//_, err = rest.crm.MakeActor(context.TODO(), &crm_api.MakeActorReq{Token: token, Name: name})
-	//if err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	ret := map[string]string{
-	//		"code":    "1",
-	//		"message": fmt.Sprintf("%s", err),
-	//		"now":     fmt.Sprintf("%d", time.Now().Unix()),
-	//	}
-	//
-	//	rsp, _ := json.Marshal(ret)
-	//	fmt.Fprintln(w, string(rsp))
-	//	return
-	//}
-
 	m := map[string]string{
 		"now": fmt.Sprintf("%d", time.Now().Unix()),
 	}
