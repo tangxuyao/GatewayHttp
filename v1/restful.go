@@ -79,7 +79,7 @@ func (rest *Restful) signUp(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	ret, err := rest.crm.Signup(context.TODO(), &crm_api.SignupReq{})
+	ret, err := rest.crm.Signup(context.TODO(), &crm_api.EmptyReq{})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "[gateway] 无法执行注册账号:%s\n", err)
