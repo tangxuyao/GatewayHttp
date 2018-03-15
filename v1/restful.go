@@ -24,13 +24,12 @@ func SetupHandler(r *mux.Router, c client.Client) {
 	restful = Restful{
 		version: "v1",
 		crm:     crm_api.NewCRMServiceClient("crmService", c),
-		gm:      gm_api.NewGameServiceClient("game-mode", c),
+		gm:      gm_api.NewGameServiceClient("GameService", c),
 	}
 
 	r.HandleFunc("/"+restful.version+"/kv", restful.getAllKV)
 	r.HandleFunc("/"+restful.version+"/signup", restful.signUp)
 	r.HandleFunc("/"+restful.version+"/startgame", restful.startGame)
-
 	//TODO：添加新的处理函数
 }
 
@@ -79,7 +78,7 @@ func (rest *Restful) signUp(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	ret, err := rest.crm.Signup(context.TODO(), &crm_api.EmptyReq{})
+	ret, err := rest.crm.Signup(context.TODO(), &crm_api.SignupReq{})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "[gateway] 无法执行注册账号:%s\n", err)
